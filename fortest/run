@@ -1,0 +1,11 @@
+set my_line=grep -n "^#${exec_person}"${script_path}/runtool|cut -d":" -+1
+set current_time=date +%Y%m%d
+if（${my_line}==""）then
+echo"#${exec_person}:${current_time}">> ${script_path}/runtool
+else
+set record_time=sed -n "${my_line}p" ${script_path}/runtool | cut -d ":" -f 2
+if（${record_time}!= ${current_time}）then
+echo"update"
+sed -i "${my_line}s/${record_time}/${current_time}/" ${script_path}/runtool
+rm -rf ${exec_path}/*
+endif
