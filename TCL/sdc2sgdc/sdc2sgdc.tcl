@@ -3,7 +3,7 @@
 ##tclsh sdc2sgdc.tcl .sdc文件 -L "L:local"在当前位置生成新文件
 ##tclsh sdc2sgdc.tcl 文件夹 -P 将指定文件夹下所有的.sdc文件转化为.sgdc。包括子文件夹
 
-source /mnt/efs/fs1/reg_test_data/common/common.tcl
+source D:/data/code/git_code/code_training/TCL/common.tcl
 ##get current dir of script
 set current_dir [file dirname [info script]]
 # source [file join $current_dir utils.tcl]
@@ -109,8 +109,7 @@ proc parseQualiferSyncStaticCmd {line} {
     } else {
         set rest_cmd "set_reset_synchronizer -name"
     }
-    ###111
-    #regsub "set_reset_synchronizer" $line1 "$rest_cmd" line1
+    regsub "set_reset_synchronizer" $line1 "$rest_cmd" line1
     set new_line [string map {"create_static" "quasi_static -name" \
                               "set_qualifier" "qualifier -name"  \
                               "set_sync_cell" "sync_cell -name" \
@@ -144,8 +143,7 @@ proc parseAbstractPortCmd {line} {
                                     "set_input_delay"
                                     "set_output_delay" "abstract_port" \
                                     " -port" ""} $line]
-            #1111
-            #set line1 [regsub {\-delay_value\s+\d} $line1 ""]
+            set line1 [regsub {\-delay_value\s+\d} $line1 ""]
             set line1 [getObj $line1]
             set line1 [string map [list $clock_id_list $clk_id] $line1]
             if {$j == [expr {$clkNum - 1}]} {
@@ -163,8 +161,7 @@ proc parseAbstractPortCmd {line} {
 
 #parse create_reset command
 proc parseCreateResetCmd {line} {
-    ###1111
-    #set line1 [regsub {\-name\s+\S+} $line ""]
+    set line1 [regsub {\-name\s+\S+} $line ""]
     set line1 [getObj $line1]
     set new_line [string map {"sense" "value" "low" "0"  "high" "1" "create_reset" "reset"} $line1]
     return $new_line 
@@ -183,8 +180,7 @@ proc parseCreateClockCmd {line} {
 
 # parse set_top command
 proc parseSetTopCmd {line} {
-    ###1111
-    #set newLine [regsub {^set_top\s+-module\s+} $line "current_design "]
+    set newLine [regsub {^set_top\s+-module\s+} $line "current_design "]
     if {$newLine ne 0} {
         global top
         regexp {^set_top\s+-module\s+(\S+)} $line fullMatch top
@@ -216,8 +212,7 @@ proc get_sgdc_lines {fileName} {
         # remove spaces/tabs/new lines...
         set newLine [string trim $line]
         if { [regexp {^#} $newLine] } {
-            ###1111
-            #lappend lineList [regsub "#" $newLine "//"]
+            lappend lineList [regsub "#" $newLine "//"]
             continue
         } else {
             set ret [is_cmd_line $newLine]
