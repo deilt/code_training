@@ -17,3 +17,4 @@ with pd.ExcelWriter(os.path.join(path,"merged_sheet_csv.xlsx")) as writer:
         # 使用文件名（去掉扩展名）作为 sheet 名
         sheet_name = os.path.splitext(os.path.basename(file))[0]
         df.to_excel(writer, sheet_name=sheet_name, index=False)
+print("合并完成！")
