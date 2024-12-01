@@ -2,15 +2,14 @@ set_top -module TOP
 
 create_clock -name clk1 [get_ports clk1]
 assign_clock_domain -domain domain1 -clock clk1
-create_clock -name clk2 [get_ports clk2]
-assign_clock_domain -domain domain2 -clock clk2
+create_clock -name clk2 [get_ports clk2];assign_clock_domain -domain domain2 -clock clk2
 
-#create_clock -name clk[0] [get_ports clk[0]]
-#assign_clock_domain -domain clk_a -clock clk[0]
-#create_clock -name clk[1] [get_ports clk[1]]
-#assign_clock_domain -domain clk_b -clock clk[1]
-#create_clock -name clk[2] [get_ports clk[2]]
-#assign_clock_domain -domain clk_c -clock clk[2]
+create_clock -name clk[0] [get_ports clk[0]]
+assign_clock_domain -domain clk_a -clock clk[0]
+create_clock -name clk[1] [get_ports clk[1]]
+assign_clock_domain -domain clk_b -clock clk[1]
+create_clock -name clk[2] [get_ports clk[2]]
+assign_clock_domain -domain clk_c -clock clk[2]
 
 create_reset -sync -name rst -sense low [get_ports rst]
 create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
