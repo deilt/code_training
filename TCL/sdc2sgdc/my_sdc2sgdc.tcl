@@ -155,6 +155,7 @@ proc get_command_type {line} {
 
 proc convert_sdc_to_sgdc {line} {
     global command_dict
+    puts "Current Dictionary: [dict get $command_dict]"
     set sgdc_line $line
     #将获取的sgdc_line 进行字典匹配
     set command_type [get_command_type $line]
@@ -162,8 +163,8 @@ proc convert_sdc_to_sgdc {line} {
     #判断字典中是否存在该命令类型，有的话执行该字典的value值的proc
     if { [dict exists $command_dict $command_type] } {
         puts "command type exists in dict"
-        set command_dict [dict get $command_dict $command_type]
-        set sgdc_line [eval $command_dict [list $line]]
+        set command_dict_proc [dict get $command_dict $command_type]
+        set sgdc_line [eval $command_dict_proc [list $line]]
         return $sgdc_line
     } else {
         #不存在该命令类型，则直接返回原行
