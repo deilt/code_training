@@ -1,11 +1,11 @@
 set_top -module TOP1
 
 #asdf
-#create_clock -name clk2 [get_ports clk2];assign_clock_domain -domain domain2 -clock clk2
+create_clock -name clk2 [get_ports clk2];assign_clock_domain -domain domain2 -clock clk2
 #clock -name clk2 -domain domain2
 
 create_clock -name clk1 [get_ports clk1]
-#assign_clock_domain -domain domain1 -clock clk1
+assign_clock_domain -domain domain1 -clock clk1
 #clock -name clk1 -domain domain1
 
 create_clock -name clka [get_ports clk3]

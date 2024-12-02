@@ -35,8 +35,25 @@ dict set command_dict create_generated_clock parseGeneratedClockCmd
 ######################################################################
 
 ################################# Proc of Dict ###############################
+#
 proc get_object_name {line} {
     # 从输入行中提取对象名称
+    puts "In get_object_name. Execute: --->> $line"
+    set command_position [string first "\[" $line]
+    puts "command_position: $command_position"
+    if {$command_position != -1} {
+        set command_end [string first "\]" $line $command_position]
+        puts "command_end: $command_end"
+        if {$command_end != -1} {
+            set command_content [string range $line $command_position [expr {$command_end}]]
+            puts "command_content: $command_content"
+            set variable_start [string last " " $command_content]
+            puts "variable_start: $variable_start"
+            set variable_name [string range $command_content [expr {$variable_start + 1}] [expr {[string length $command_content] - 2 }]]
+            puts "variable_name: $variable_name"
+        }
+    }
+    return $variable_name
 }
 
 proc parseSetTopCmd {line} {
@@ -69,22 +86,24 @@ proc parseCreateClockCmd {line} {
         puts "Extracted clock name: $clock_name"
     }
     # 查找[get_ports]、[get_nets]或[get_pins]并提取相应内容
-    set command_position [string first "\[" $line]
-    set command_position [string first "\[" $line]
-    puts "command_position: $command_position"
-    if {$command_position != -1} {
-        set command_end [string first "\]" $line $command_position]
-        puts "command_end: $command_end"
-        if {$command_end != -1} {
-            set command_content [string range $line $command_position [expr {$command_end}]]
-            puts "command_content: $command_content"
-            set variable_start [string last " " $command_content]
-            puts "variable_start: $variable_start"
-            set variable_name [string range $command_content [expr {$variable_start + 1}] [expr {$command_end - 1}]]
-            puts "variable_name: $variable_name"
+    set variable_name [get_object_name $line]
+    #查询该行是否存在assign_clock_domain，若存在，则提取-domain 后面的子字符串domain2
+    set assign_clock_domain_position [string first "assign_clock_domain" $line]
+    if {$assign_clock_domain_position != -1} {
+        set domain_start [expr {$assign_clock_domain_position + [string length "assign_clock_domain"] + 1}]
+        set domain_position [string first "-domain" $line $domain_start]
+        if {$domain_position != -1} {
+            set domain_start [expr {$domain_position + [string length "-domain"] + 1}]
+            set domain_end [string first " " $line $domain_start]
+            set clock_domain [string range $line $domain_start [expr {$domain_end - 1}]]
+            puts "Extracted clock domain: $clock_domain"
+            set clock_name $clock_domain
         }
+    } else {
+        set clock_name $clock_name
     }
-    return "clock -name $clock_name -domain $variable_name"
+    # 输出转换后的行
+    return "clock -name $variable_name -domain $clock_name "
 }
 
 proc parseCreateResetCmd {line} {
@@ -114,12 +133,13 @@ proc parseGeneratedClockCmd {line} {
 
 ############################# Read sdc file #############################
 proc sdc_to_sgdc {sdc_file} {
+    # 预处理SDC文件
+    set sdc_file_temp [preprocess_sdc_file $sdc_file]
     # 打开SDC文件读取内容
-    set sdc_handle [open $sdc_file r]
+    set sdc_handle [open $sdc_file_temp r]
     # 生成sgdc文件并打开SGDC文件写入内容
-    set sgdc_file [file join [file dirname $sdc_file] [file rootname $sdc_file].sgdc]
+    set sgdc_file [file join [file dirname $sdc_file_temp] [file rootname $sdc_file].sgdc]
     set sgdc_handle [open $sgdc_file w]
-
     # 逐行读取SDC文件
     while {[gets $sdc_handle line] >= 0} {
         # 解析SDC文件的每一行,并去除两端的空格
@@ -145,6 +165,8 @@ proc sdc_to_sgdc {sdc_file} {
     # 关闭文件句柄
     close $sdc_handle
     close $sgdc_handle
+    #删除临时文件sdc_file
+    file delete $sdc_file_temp
 }
 
 proc get_command_type {line} {
@@ -155,7 +177,6 @@ proc get_command_type {line} {
 
 proc convert_sdc_to_sgdc {line} {
     global command_dict
-    puts "Current Dictionary: [dict get $command_dict]"
     set sgdc_line $line
     #将获取的sgdc_line 进行字典匹配
     set command_type [get_command_type $line]
@@ -171,6 +192,57 @@ proc convert_sdc_to_sgdc {line} {
         puts "command type not exists in dict"
         return $sgdc_line
     }
+}
+
+#文件预处理
+proc preprocess_sdc_file {sdc_file} {
+    set input_file $sdc_file        ;# 输入SDC文件
+    set output_file [file join [file dirname $sdc_file] "temp.sdc"]      ;# 输出处理后的SDC文件
+
+    # 打开输入文件进行读取
+    set f_in [open $input_file r]
+    # 打开输出文件进行写入
+    set f_out [open $output_file w]
+
+    # 初始化变量
+    set previous_line ""
+    set merge_flag 0
+
+    # 逐行读取输入文件
+    while {[gets $f_in line] != -1} {
+        # 检查是否为以 create_clock 开头的行
+        if {[string match "create_clock*" $line]} {
+            set previous_line $line
+            set merge_flag 1
+        } elseif {[string match "assign_clock_domain*" $line]} {
+            # 如果当前行为以 assign_clock_domain 开头，检查是否有前一行
+            if {$merge_flag == 1} {
+                # 合并前一行和当前行
+                puts $f_out "$previous_line; $line"
+                set merge_flag 0  ;# 重置标志
+            } else {
+                # 如果没有合并标志，则直接输出当前行
+                puts $f_out $line
+            }
+        } else {
+            # 如果没有匹配的行，直接输出
+            if {$merge_flag == 1} {
+                puts $f_out $previous_line
+                set merge_flag 0  ;# 重置标志
+            }
+            puts $f_out $line
+        }
+    }
+
+    # 处理最后一行
+    if {$merge_flag == 1} {
+        puts $f_out $previous_line
+    }
+    # 关闭文件
+    close $f_in
+    close $f_out
+    #返回处理后的SDC文件路径
+    return $output_file
 }
 
 #Put Usages here and get the options

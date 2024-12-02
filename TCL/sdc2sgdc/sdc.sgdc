@@ -1,14 +1,13 @@
 current_design TOP1
 
 //asdf
-//create_clock -name clk2 [get_ports clk2];assign_clock_domain -domain domain2 -clock clk2
+clock -name clk2 -domain domain2 
 //clock -name clk2 -domain domain2
 
-clock -name clk1 -domain clk1]
-//assign_clock_domain -domain domain1 -clock clk1
+clock -name clk1 -domain domain1 
 //clock -name clk1 -domain domain1
 
-clock -name clka -domain clk3]
+clock -name clk3 -domain clka 
 //clock -name clk3 -domain clka
 
 //create_reset -sync -name rst -sense low [get_ports rst]
