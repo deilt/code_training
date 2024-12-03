@@ -1,22 +1,23 @@
 current_design TOP1
 
 //asdf
-clock -name clk2 -domain domain2 
+clock -name clk2 -domain  domain2  
 //clock -name clk2 -domain domain2
+clock -name clk2 -domain  domain2 
 
-clock -name clk1 -domain domain1 
+clock -name clk1 -domain  domain1  
 //clock -name clk1 -domain domain1
 
 clock -name clk3 -domain clka 
 //clock -name clk3 -domain clka
 
-//create_reset -sync -name rst -sense low [get_ports rst]
+reset -sync -name rst -value 0 [get_ports rst1]
 //create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
 //create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 
-//reset -sync  -value 0 -name rst
-//reset -sync  -value 0 -name rst[0]
-//reset -sync  -value 0 -name rst[1]
+//reset -sync -value 0 -name rst
+//reset -sync -value 0 -name rst[0]
+//reset -sync -value 0 -name rst[1]
 
 //set_abstract_port -port [get_ports di_0] -clock clk[0]
 //set_abstract_port -port [get_ports di_1] -clock clk[0]
@@ -28,8 +29,3 @@ clock -name clk3 -domain clka
 //set_reset_synchronizer path_end[0] -reset rst[0] -clock clk[1] -value 0
 //set_ip_block BB
 //set_cdc_false_path -from di_0 -to do_0 -from_type data -to_type data
-
-//set_abstract_port -port [get_ports di_0] -clock clk[0]
-//set_abstract_port -port [get_ports di_1] -clock clk[0]
-//set_abstract_port -port [get_ports di_2] -clock clk[0]
-

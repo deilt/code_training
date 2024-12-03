@@ -92,13 +92,15 @@ proc parseCreateClockCmd {line} {
     if {$assign_clock_domain_position != -1} {
         set domain_start [expr {$assign_clock_domain_position + [string length "assign_clock_domain"] + 1}]
         set domain_position [string first "-domain" $line $domain_start]
-        if {$domain_position != -1} {
-            set domain_start [expr {$domain_position + [string length "-domain"] + 1}]
-            set domain_end [string first " " $line $domain_start]
-            set clock_domain [string range $line $domain_start [expr {$domain_end - 1}]]
-            puts "Extracted clock domain: $clock_domain"
-            set clock_name $clock_domain
+        set domain_start [string first " " $line [expr {$domain_position + [string length "-domain"]}]]
+        set domain_end [string first " " $line [expr {$domain_start + 1}]]
+        if {$domain_end == -1} {
+            set clock_domain [string range $line $domain_start end]
+        } else {
+            set clock_domain [string range $line $domain_start $domain_end]
         }
+        puts "Extracted clock domain: $clock_domain"
+        set clock_name $clock_domain
     } else {
         set clock_name $clock_name
     }
@@ -107,6 +109,12 @@ proc parseCreateClockCmd {line} {
 }
 
 proc parseCreateResetCmd {line} {
+    set line [string map {"create_reset" "reset"} $line]
+    set line [string map {"sense" "value"} $line]
+    set line [string map {"low" "0"} $line]
+    set line [string map {"high" "1"} $line]
+    set reset_name [get_object_name $line]
+    return $line
 }
 
 proc parseAbstractPortCmd {line} {
@@ -210,6 +218,8 @@ proc preprocess_sdc_file {sdc_file} {
 
     # 逐行读取输入文件
     while {[gets $f_in line] != -1} {
+        #将当前行中存在多个空格替换成一个空格
+        set line [regsub -all {\s+} $line " "]
         # 检查是否为以 create_clock 开头的行
         if {[string match "create_clock*" $line]} {
             set previous_line $line
