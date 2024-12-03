@@ -13,7 +13,7 @@ create_clock -name clka [get_ports clk3]
 #clock -name clk3 -domain clka
 
 create_reset -sync -name rst -sense low [get_ports rst1]
-#create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
+create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
 #create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 
 #reset -sync  -value 0 -name rst

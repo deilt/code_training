@@ -11,8 +11,8 @@ clock -name clk1 -domain  domain1
 clock -name clk3 -domain clka 
 //clock -name clk3 -domain clka
 
-reset -sync -name rst -value 0 [get_ports rst1]
-//create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
+reset -sync -name rst1 -value 0 [get_ports rst11]
+reset -sync -name rst[0 -value 0 [get_ports rst[0]
 //create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 
 //reset -sync -value 0 -name rst

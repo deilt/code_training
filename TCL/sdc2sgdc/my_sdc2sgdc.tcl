@@ -39,7 +39,7 @@ dict set command_dict create_generated_clock parseGeneratedClockCmd
 proc get_object_name {line} {
     # 从输入行中提取对象名称
     puts "In get_object_name. Execute: --->> $line"
-    set command_position [string first "\[" $line]
+    set command_position [string first "\[get_" $line]
     puts "command_position: $command_position"
     if {$command_position != -1} {
         set command_end [string first "\]" $line $command_position]
@@ -114,6 +114,19 @@ proc parseCreateResetCmd {line} {
     set line [string map {"low" "0"} $line]
     set line [string map {"high" "1"} $line]
     set reset_name [get_object_name $line]
+    #获取-name所在的位置，并获取-name后面的第一个子字符串直至遇到空格或者换行
+    # 找到-name的位置并提取后面的子字符串
+    set name_position [string first "-name" $line]
+    set name_start [expr {$name_position + [string length "-name"] + 1}]
+    set name_end [string first " " $line $name_start]
+    if {$name_end == -1} {
+        set name_get [string range $line $name_start end]
+    } else {
+        set name_get [string range $line $name_start [expr {$name_end - 1}]]
+    }
+    set line [string map [list $name_get $reset_name] $line]
+    #去除[get_开头，]结尾的字符串或者]]结尾的中间的字符串。例如去除[get_ports rst11]
+    #set line [regsub -all {\[get_\w+\s*\w*\s*\]} $line ""]
     return $line
 }
 
