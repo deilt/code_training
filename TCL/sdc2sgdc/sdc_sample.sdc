@@ -11,6 +11,11 @@ assign_clock_domain -domain clk_b -clock clk[1]
 create_clock -name clk[2] [get_ports clk[2]]
 assign_clock_domain -domain clk_c -clock clk[2]
 
+create_clock -name clk[0] [get_ports clk[0]] ;assign_clock_domain -domain clk_a -clock clk[0]
+create_clock -name clk[0] [get_ports clk[0]] ;assign_clock_domain -domain clk_b -clock clk[0]
+
+create_clock -name clk[0]
+
 create_reset -sync -name rst -sense low [get_ports rst]
 create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
 create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
