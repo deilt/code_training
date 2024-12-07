@@ -1,18 +1,35 @@
 current_design TOP1
 
-//asdf
+//////////////////////////////////////////////////////////////////////////////
+//Create clocks
 clock -name clk2 -domain  domain2  
 //clock -name clk2 -domain domain2
 clock -name clk2 -domain  domain2 
-
+//clock -name clk2 -domain domain2
 clock -name clk1 -domain  domain1  
 //clock -name clk1 -domain domain1
 
 clock -name clk3 -domain clka 
 //clock -name clk3 -domain clka
 
+
+clock -name clk[0] -domain  clk_a  
+//clock -name clk[0] -domain clk_a
+clock -name clk[1] -domain  clk_b  
+//clock -name clk[1] -domain clk_b
+clock -name clk[2] -domain  clk_c  
+//clock -name clk[2] -domain clk_c
+
+clock -name clk[0] -domain  clk_a  
+//clock -name clk[0] -domain clk_a
+//create_clock -name clka
+//clock -tag clka
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//create resets
 reset -sync -name rst1 -value 0 [get_ports rst11]
-reset -sync -name rst[0 -value 0 [get_ports rst[0]
+reset -sync -name rst[0] -value 0 [get_ports rst[0]]
 //create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 
 //reset -sync -value 0 -name rst
