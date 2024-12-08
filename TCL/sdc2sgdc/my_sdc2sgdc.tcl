@@ -169,7 +169,15 @@ proc parseAbstractPortCmd {line} {
 }
 
 proc parseAnalysisCmd {line} {
-    set line [string map {"set_case_analysis" "analysis"} $line]
+    set line [string map {"-object" "-name"} $line]
+    set variable_name [get_object_name $line]
+    set line [regsub -all {\[get_\w+\s\S+\](\s|\n){0,1}} $line "$variable_name "]
+    #get digital of line
+    set value [regexp {\s\d} $line]
+    puts "value: $value"
+    set line [regsub -all {\s\d} $line " -value $value"]
+    puts "line: $line"
+    return $line
 }
 
 proc parseQualiferSyncStaticCmd {line} {

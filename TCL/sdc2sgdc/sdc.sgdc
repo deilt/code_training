@@ -1,7 +1,6 @@
 current_design TOP1
 
-//////////////////////////////////////////////////////////////////////////////
-//Create clocks
+////////////////////////////////////////////// Create clocks //////////////////////////////////////////////
 clock -name clk2 -domain  domain2  
 //clock -name clk2 -domain domain2
 clock -name clk2 -domain  domain2 
@@ -11,7 +10,6 @@ clock -name clk1 -domain  domain1
 
 clock -name clk3 -domain clka 
 //clock -name clk3 -domain clka
-
 
 clock -name clk[0] -domain  clk_a  
 //clock -name clk[0] -domain clk_a
@@ -26,9 +24,7 @@ clock -name clk[0] -domain  clk_a
 clock -name  -domain clka 
 //clock -tag clka
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//create resets
+////////////////////////////////////////////// create resets //////////////////////////////////////////////
 reset -sync -name rst1 -value 0 
 //reset -sync -value 0 -name rst1
 reset -sync -name rst[0] -value 0 
@@ -36,7 +32,7 @@ reset -sync -name rst[0] -value 0
 reset -sync -name rst[1] -value 0 
 //reset -sync -value 0 -name rst[1]
 
-
+////////////////////////////////////////////// set_abstract_port //////////////////////////////////////////////
 abstract_port -port di_0 -clock clk[0]
 //abstract_port -ports di_0 -clock clk[0]
 abstract_port -port di_1 -clock clk[0]
@@ -48,9 +44,32 @@ abstract_port -clock clk[0] -port di_0
 abstract_port -clock clk[0] -port di_0[0] 
 //abstract_port -ports di_0[0] -clock clk[0]
 
-//set_case_analysis -objects [get_ports di_1] 1
-//set_qualifier do_1 -from_clk clk[0] -to_clk clk[1]
-//set_sync_cell SYNC_CELL -from_clk clk[0] -to_clk clk[1]
-//set_reset_synchronizer path_end[0] -reset rst[0] -clock clk[1] -value 0
-//set_ip_block BB
-//set_cdc_false_path -from di_0 -to do_0 -from_type data -to_type data
+////////////////////////////////////////////// set_case_analysis //////////////////////////////////////////////
+set_case_analysis -names di_1 -value 1
+//set_case_analysis -name di_1 -value 1
+set_case_analysis -names din -value 1
+//set_case_analysis -name din -value 0
+
+////////////////////////////////////////////// create_static //////////////////////////////////////////////
+
+//quasi_static -name aa
+
+////////////////////////////////////////////// creatset_qualifiere_static //////////////////////////////////////////////
+
+//qualifier -name dout -from_clk clk[0] -to_clk clk[1] -crossing
+
+////////////////////////////////////////////// set_sync_cell //////////////////////////////////////////////
+
+//sync_cell -name TEST -from_clk clk[0] -to_clk clk[2]
+
+////////////////////////////////////////////// set_reset_synchronizer //////////////////////////////////////////////
+
+//reset_synchronizer -name rst_out -clock clk[1] -reset rst[0] -value 1
+
+////////////////////////////////////////////// set_ip_block //////////////////////////////////////////////
+
+//ip_block -name TEST
+
+////////////////////////////////////////////// set_signal_relationship //////////////////////////////////////////////
+set_signal_relationship -exclusive X Y Z
+//cdc_attribute -exclusive X Y Z
