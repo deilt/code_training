@@ -1,7 +1,6 @@
 set_top -module TOP1
 
-#######################################
-#Create clocks
+####################### Create clocks #######################
 create_clock -name clk2 [get_ports clk2];assign_clock_domain -domain domain2 -clock clk2
 #clock -name clk2 -domain domain2
 create_clock -name clk2 [get_ports clk2];assign_clock_domain -clock clk2 -domain domain2 
@@ -12,7 +11,6 @@ assign_clock_domain -domain domain1 -clock clk1
 
 create_clock -name clka [get_ports clk3]
 #clock -name clk3 -domain clka
-
 
 create_clock -name clk[0] [get_ports clk[0]]
 assign_clock_domain -domain clk_a -clock clk[0]
@@ -30,9 +28,7 @@ create_clock -name clk[0] [get_ports clk[0]] ;assign_clock_domain -domain clk_a 
 create_clock -name clka 
 #clock -tag clka
 
-
-#########################################
-#create resets
+####################### create resets #######################
 create_reset -sync -name rst -sense low [get_ports rst1]
 #reset -sync  -value 0 -name rst1
 create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
@@ -40,7 +36,7 @@ create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
 create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 #reset -sync  -value 0 -name rst[1]
 
-
+####################### set_abstract_port #######################
 set_abstract_port -port [get_ports di_0] -clock clk[0]
 #abstract_port -ports di_0 -clock clk[0]
 set_abstract_port -port [get_ports di_1] -clock clk[0]
@@ -52,9 +48,32 @@ set_abstract_port  -clock clk[0] -port [get_ports di_0]
 set_abstract_port  -clock clk[0] -port [get_ports di_0[0]]
 #abstract_port -ports di_0[0] -clock clk[0]
 
-#set_case_analysis -objects [get_ports di_1] 1
-#set_qualifier do_1 -from_clk clk[0] -to_clk clk[1]
-#set_sync_cell SYNC_CELL -from_clk clk[0] -to_clk clk[1]
-#set_reset_synchronizer path_end[0] -reset rst[0] -clock clk[1] -value 0
-#set_ip_block BB
-#set_cdc_false_path -from di_0 -to do_0 -from_type data -to_type data
+####################### set_case_analysis #######################
+set_case_analysis -objects [get_ports di_1] 1
+#set_case_analysis -name di_1 -value 1
+set_case_analysis -objects [get_ports din] 0
+#set_case_analysis -name din -value 0
+
+####################### create_static #######################
+create_static aa
+#quasi_static -name aa
+
+####################### creatset_qualifiere_static #######################
+set_qualifier dout -from_clk clk[0] -to_clk clk[1] -crossing
+#qualifier -name dout -from_clk clk[0] -to_clk clk[1] -crossing
+
+####################### set_sync_cell #######################
+set_sync_cell TEST -from_clk clk[0] -to_clk clk[2]
+#sync_cell -name TEST -from_clk clk[0] -to_clk clk[2]
+
+####################### set_reset_synchronizer #######################
+set_reset_synchronizer rst_out -clock clk[1] -reset rst[0] -value 1
+#reset_synchronizer -name rst_out -clock clk[1] -reset rst[0] -value 1
+
+####################### set_ip_block #######################
+set_ip_block TEST
+#ip_block -name TEST
+
+####################### set_signal_relationship #######################
+set_signal_relationship -exclusive X Y Z
+#cdc_attribute -exclusive X Y Z
