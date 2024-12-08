@@ -49,6 +49,8 @@ set_abstract_port -port [get_ports di_vld] -clock clk[0]
 #abstract_port -ports di_vld -clock clk[0]
 set_abstract_port  -clock clk[0] -port [get_ports di_0]
 #abstract_port -ports di_0 -clock clk[0]
+set_abstract_port  -clock clk[0] -port [get_ports di_0[0]]
+#abstract_port -ports di_0[0] -clock clk[0]
 
 #set_case_analysis -objects [get_ports di_1] 1
 #set_qualifier do_1 -from_clk clk[0] -to_clk clk[1]

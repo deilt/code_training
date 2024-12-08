@@ -36,6 +36,7 @@ dict set command_dict create_generated_clock parseGeneratedClockCmd
 
 ################################# Proc of Dict ###############################
 #get_ports、get_nets、get_pins to get signal name
+#other ways is to regsub get []
 proc get_object_name {line} {
     # Extract the object name from the input line
     puts "In get_object_name. Execute: --->> $line"
@@ -47,7 +48,8 @@ proc get_object_name {line} {
         puts "first_left_bracket: $first_left_bracket"
         set last_left_bracket [string last "\[" $line]
         puts "last_left_bracket: $last_left_bracket"
-        if { $first_left_bracket == -1 } {
+        set first_right_bracket [string first "\]" $line [expr {$command_position + 1}]]
+        if { $first_left_bracket == -1 || $first_left_bracket > $first_right_bracket } {
             set command_end [string first "\]" $line $command_position]
             set command_content [string range $line $command_position [expr {$command_end}]]
             puts "command_content: $command_content"
@@ -161,12 +163,13 @@ proc parseAbstractPortCmd {line} {
     set line [string map {"set_abstract_port" "abstract_port"} $line]
     #substring [get_ports] to get the port name
     set variable_name [get_object_name $line]
-    set line [regsub -all {\[get_\w+\s*.*\][\s\n]} $line $variable_name]
+    set line [regsub -all {\[get_\w+\s\S+\](\s|\n){0,1}} $line "$variable_name "]
     #Outputs the converted lines
     return $line
 }
 
 proc parseAnalysisCmd {line} {
+    set line [string map {"set_case_analysis" "analysis"} $line]
 }
 
 proc parseQualiferSyncStaticCmd {line} {
