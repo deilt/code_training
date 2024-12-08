@@ -83,24 +83,24 @@ proc get_object_name {line} {
 }
 
 proc parseSetTopCmd {line} {
-    #'set_top -module TOP'字符串转换为'current_design TOP',TOP的名字不一定是TOP，需要保存
-    # 从输入行中提取模块名称
+    #The 'set_top -module TOP' string is converted to 'current_design TOP', the name of the TOP is not necessarily TOP, and needs to be saved
+    # Extract the module name from the input line
     puts "In parseSetTopCmd. Execute: --->> $line"
-    set top_module_name [lindex $line 2]  ; # 假设格式为 "set_top -module MODULE_NAME"
-    # 输出当前设计命令
+    set top_module_name [lindex $line 2]  ; # Let's assume the format is “set_top -module MODULE_NAME”
+    # Outputs the current design command
     puts ">>> current_design $top_module_name"
-    # 返回转换后的行
+    # Returns the converted rows
     return "current_design $top_module_name"
 }
 
 
 proc parseCreateClockCmd {line} {
-    #将create_clock -name clka [get_ports clk3]转换为clock -name clk3 -domain clka
+    #create_clock -name clka [get_ports clk3]Convert to clock -name clk3 -domain clka
     puts "In parseCreateClockCmd. Execute: --->> $line"
-    #将create_clock 转换为clock
+    #Convert create_clock to clock
     set line [string map {"create_clock" "clock"} $line]
-    #获取-name所在的位置，并获取-name后面的第一个子字符串直至遇到空格或者换行
-    # 找到-name的位置并提取后面的子字符串
+    #Get where -name is located, and get the first substring after -name until you encounter a space or line break
+    # Find the location of -name and extract the following substring
     set name_position [string first "-name" $line]
     if {$name_position != -1} {
         set name_start [expr {$name_position + [string length "-name"] + 1}]
@@ -111,9 +111,9 @@ proc parseCreateClockCmd {line} {
         set clock_name [string range $line $name_start [expr {$name_end - 1}]]
         puts "Extracted clock name: $clock_name"
     }
-    # 查找[get_ports]、[get_nets]或[get_pins]并提取相应内容
+    # Find and extract [get_ports], [get_nets], or [get_pins].
     set variable_name [get_object_name $line]
-    #查询该行是否存在assign_clock_domain，若存在，则提取-domain 后面的子字符串domain2
+    #Query whether the row has a assign_clock_domain, and if so, extract the substring domain2 after -domain
     set assign_clock_domain_position [string first "assign_clock_domain" $line]
     if {$assign_clock_domain_position != -1} {
         set domain_start [expr {$assign_clock_domain_position + [string length "assign_clock_domain"] + 1}]
@@ -130,7 +130,8 @@ proc parseCreateClockCmd {line} {
     } else {
         set clock_name $clock_name
     }
-    # 输出转换后的行
+    #
+    # Outputs the converted lines
     return "clock -name $variable_name -domain $clock_name "
 }
 
@@ -140,8 +141,8 @@ proc parseCreateResetCmd {line} {
     set line [string map {"low" "0"} $line]
     set line [string map {"high" "1"} $line]
     set reset_name [get_object_name $line]
-    #获取-name所在的位置，并获取-name后面的第一个子字符串直至遇到空格或者换行
-    # 找到-name的位置并提取后面的子字符串
+    #Get the location of -name, and get the first substring after -name until you encounter a space or line break
+    # Found it-name and extract the following substring
     set name_position [string first "-name" $line]
     set name_start [expr {$name_position + [string length "-name"] + 1}]
     set name_end [string first " " $line $name_start]
@@ -151,12 +152,18 @@ proc parseCreateResetCmd {line} {
         set name_get [string range $line $name_start [expr {$name_end - 1}]]
     }
     set line [string map [list $name_get $reset_name] $line]
-    #去除[get_开头，]结尾的字符串或者]]结尾的中间的字符串。例如去除[get_ports rst11]
-    #set line [regsub -all {\[get_\w+\s*\w*\s*\]} $line ""]
+    #Remove the string at the beginning of [get_,] or the string in the middle of the end of ]]. For example, removal[get_ports rst11]
+    set line [regsub -all {\[get_\w+\s.*\]$} $line ""]
     return $line
 }
 
 proc parseAbstractPortCmd {line} {
+    set line [string map {"set_abstract_port" "abstract_port"} $line]
+    #substring [get_ports] to get the port name
+    set variable_name [get_object_name $line]
+    set line [regsub -all {\[get_\w+\s*.*\][\s\n]} $line $variable_name]
+    #Outputs the converted lines
+    return $line
 }
 
 proc parseAnalysisCmd {line} {

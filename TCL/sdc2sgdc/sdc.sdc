@@ -26,24 +26,30 @@ assign_clock_domain -domain clk_c -clock clk[2]
 
 create_clock -name clk[0] [get_ports clk[0]] ;assign_clock_domain -domain clk_a -clock clk[0]
 #clock -name clk[0] -domain clk_a
-#create_clock -name clka 
+
+create_clock -name clka 
 #clock -tag clka
 
 
 #########################################
 #create resets
 create_reset -sync -name rst -sense low [get_ports rst1]
+#reset -sync  -value 0 -name rst1
 create_reset -sync -name rst[0] -sense low [get_ports rst[0]]
-#create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
-
-#reset -sync  -value 0 -name rst
 #reset -sync  -value 0 -name rst[0]
+create_reset -sync -name rst[1] -sense low [get_ports rst[1]]
 #reset -sync  -value 0 -name rst[1]
 
-#set_abstract_port -port [get_ports di_0] -clock clk[0]
-#set_abstract_port -port [get_ports di_1] -clock clk[0]
-#set_abstract_port -port [get_ports di_2] -clock clk[0]
-#
+
+set_abstract_port -port [get_ports di_0] -clock clk[0]
+#abstract_port -ports di_0 -clock clk[0]
+set_abstract_port -port [get_ports di_1] -clock clk[0]
+#abstract_port -ports di_1 -clock clk[1]
+set_abstract_port -port [get_ports di_vld] -clock clk[0]
+#abstract_port -ports di_vld -clock clk[0]
+set_abstract_port  -clock clk[0] -port [get_ports di_0]
+#abstract_port -ports di_0 -clock clk[0]
+
 #set_case_analysis -objects [get_ports di_1] 1
 #set_qualifier do_1 -from_clk clk[0] -to_clk clk[1]
 #set_sync_cell SYNC_CELL -from_clk clk[0] -to_clk clk[1]
