@@ -25,16 +25,22 @@ dict set command_dict set_abstract_port parseAbstractPortCmd
 dict set command_dict set_input_delay parseAbstractPortCmd
 dict set command_dict set_output_delay parseAbstractPortCmd
 dict set command_dict set_case_analysis parseAnalysisCmd
-dict set command_dict create_static parseQualiferSyncStati
+dict set command_dict create_static parseQualiferSyncStaticCmd
 dict set command_dict set_qualifier parseQualiferSyncStaticCmd
 dict set command_dict set_sync_cell parseQualiferSyncStaticCmd
 dict set command_dict set_reset_synchronizer parseQualiferSyncStaticCmd
 dict set command_dict set_ip_block parseQualiferSyncStaticCmd
 dict set command_dict set_cdc_false_path parseQualiferSyncStaticCmd
 dict set command_dict create_generated_clock parseGeneratedClockCmd
+dict set command_dict set_signal_relationship parseSignalRelationshipCmd
 ######################################################################
 
 ################################# Proc of Dict ###############################
+#TOP.a.b.c to top.a/b/c
+proc convert_hierarchical_name {name} {
+    set hierarchical_name ""
+}
+
 #get_ports、get_nets、get_pins to get signal name
 #other ways is to regsub get []
 proc get_object_name {line} {
@@ -181,14 +187,22 @@ proc parseAnalysisCmd {line} {
 }
 
 proc parseQualiferSyncStaticCmd {line} {
-}
+    #add -name
 
-proc parseQualiferSyncStati {line} {
+    set line [string map {"create_static" "quasi_static"} $line]
+    set line [string map {"set_qualifier" "qualifier"} $line]
+    set line [string map {"set_sync_cell" "sync_cell"} $line]
+    set line [string map {"set_ip_block" "ip_block"} $line]
+    return $line
 }
 
 proc parseGeneratedClockCmd {line} {
 }
 
+proc parseSignalRelationshipCmd {line} {
+    set line [string map {"set_signal_relationship" "cdc_attribute"} $line]
+    return $line
+}
 ############################# Main #############################
 #1. Read the SDC file.
 #2. Parse the content of the SDC file.
@@ -198,44 +212,44 @@ proc parseGeneratedClockCmd {line} {
 
 ############################# Read sdc file #############################
 proc sdc_to_sgdc {sdc_file} {
-    # 预处理SDC文件
+    # Preprocess SDC files
     set sdc_file_temp [preprocess_sdc_file $sdc_file]
-    # 打开SDC文件读取内容
+    # Open the SDC file to read the contents
     set sdc_handle [open $sdc_file_temp r]
-    # 生成sgdc文件并打开SGDC文件写入内容
+    # Generate the sgdc file and open the SGDC file to write the contents
     set sgdc_file [file join [file dirname $sdc_file_temp] [file rootname $sdc_file].sgdc]
     set sgdc_handle [open $sgdc_file w]
-    # 逐行读取SDC文件
+    # Read the SDC file line by line
     while {[gets $sdc_handle line] >= 0} {
-        # 解析SDC文件的每一行,并去除两端的空格
+        # Parse every line of the SDC file and remove the spaces at both ends
         set line [string trim $line]
-        # 跳过空行和注释
+        # Skip blank lines and comments
         if {[string equal $line ""]} {
-            puts $sgdc_handle $line  ; # 直接写入空行
+            puts $sgdc_handle $line  ; # Write blank lines directly
             continue
         }
-        # 处理注释行
+        # Work with comment lines
         if {[string match "#" [string index $line 0]]} {
             set modified_line [string map {"#" "//"} $line]
-            puts $sgdc_handle $modified_line  ; # 直接写入注释
+            puts $sgdc_handle $modified_line  ; # Write comments directly
             continue
         }
         xxx
         __puts_color_font__ -blue "In Process:-> $line"
-        # 根据SDC语法进行转换
+        # Convert according to SDC syntax
         set sgdc_line [convert_sdc_to_sgdc $line]
         puts $sgdc_handle $sgdc_line
     }
 
-    # 关闭文件句柄
+    # Close the file handle
     close $sdc_handle
     close $sgdc_handle
-    #删除临时文件sdc_file
+    #Delete temporary file sdc_file
     file delete $sdc_file_temp
 }
 
 proc get_command_type {line} {
-    # 解析SDC文件每一行的命令类型
+    # The command type that parses each line of the SDC file
     set command_type [lindex $line 0]
     return $command_type
 }
@@ -243,72 +257,72 @@ proc get_command_type {line} {
 proc convert_sdc_to_sgdc {line} {
     global command_dict
     set sgdc_line $line
-    #将获取的sgdc_line 进行字典匹配
+    #Dictionary matching of the obtained sgdc_line
     set command_type [get_command_type $line]
     puts "Command_Type:-> $command_type"
-    #判断字典中是否存在该命令类型，有的话执行该字典的value值的proc
+    #Check whether the command type exists in the dictionary, and if so, execute the proc of the value value of the dictionary
     if { [dict exists $command_dict $command_type] } {
         puts "command type exists in dict"
         set command_dict_proc [dict get $command_dict $command_type]
         set sgdc_line [eval $command_dict_proc [list $line]]
         return $sgdc_line
     } else {
-        #不存在该命令类型，则直接返回原行
+        #If this command type does not exist, the command type is returned to the original line
         puts "command type not exists in dict"
         return $sgdc_line
     }
 }
 
-#文件预处理
+#File preprocessing
 proc preprocess_sdc_file {sdc_file} {
-    set input_file $sdc_file        ;# 输入SDC文件
-    set output_file [file join [file dirname $sdc_file] "temp.sdc"]      ;# 输出处理后的SDC文件
+    set input_file $sdc_file        ;# Enter the SDC file
+    set output_file [file join [file dirname $sdc_file] "temp.sdc"]      ;# Output the processed SDC file
 
-    # 打开输入文件进行读取
+    # Open the input file to read it
     set f_in [open $input_file r]
-    # 打开输出文件进行写入
+    # Open the output file to write
     set f_out [open $output_file w]
 
-    # 初始化变量
+    # 初Initiation variables
     set previous_line ""
     set merge_flag 0
 
-    # 逐行读取输入文件
+    # Read the input file line by line
     while {[gets $f_in line] != -1} {
-        #将当前行中存在多个空格替换成一个空格
+        #Replaces multiple spaces in the current line with a single space
         set line [regsub -all {\s+} $line " "]
-        # 检查是否为以 create_clock 开头的行
+        # Check if it's a line that starts with create_clock
         if {[string match "create_clock*" $line]} {
             set previous_line $line
             set merge_flag 1
         } elseif {[string match "assign_clock_domain*" $line]} {
-            # 如果当前行为以 assign_clock_domain 开头，检查是否有前一行
+            # If the current behavior starts with assign_clock_domain, check to see if there is a previous line
             if {$merge_flag == 1} {
-                # 合并前一行和当前行
+                # Merge the previous and current lines
                 puts $f_out "$previous_line; $line"
-                set merge_flag 0  ;# 重置标志
+                set merge_flag 0  ;# Reset the flag
             } else {
-                # 如果没有合并标志，则直接输出当前行
+                # If there is no merge flag, the current line is output directly
                 puts $f_out $line
             }
         } else {
-            # 如果没有匹配的行，直接输出
+            # If there are no matching rows, output directly
             if {$merge_flag == 1} {
                 puts $f_out $previous_line
-                set merge_flag 0  ;# 重置标志
+                set merge_flag 0  ;# Reset the flag
             }
             puts $f_out $line
         }
     }
 
-    # 处理最后一行
+    # Process the last line
     if {$merge_flag == 1} {
         puts $f_out $previous_line
     }
-    # 关闭文件
+    # Close the file
     close $f_in
     close $f_out
-    #返回处理后的SDC文件路径
+    #Returns the path of the processed SDC file
     return $output_file
 }
 
