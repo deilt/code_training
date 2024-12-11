@@ -80,4 +80,4 @@ set_signal_relationship -exclusive X Y Z
 
 ####################### create_generated_clock #######################
 create_generated_clock -name gen_C1 -master C1 -divide_by 2 [get_ports out1]
-#generated_clock -name out1 -source srcClk -master_clock C1 -divide_by 2
+#generated_clock -name out1 -master_clock C1 -divide_by 2

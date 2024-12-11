@@ -175,7 +175,7 @@ proc parseAbstractPortCmd {line} {
 }
 
 proc parseAnalysisCmd {line} {
-    set line [string map {"-object" "-name"} $line]
+    set line [string map {"-objects" "-name"} $line]
     set variable_name [get_object_name $line]
     set line [regsub -all {\[get_\w+\s\S+\](\s|\n){0,1}} $line "$variable_name "]
     #get digital of line
@@ -187,16 +187,20 @@ proc parseAnalysisCmd {line} {
 }
 
 proc parseQualiferSyncStaticCmd {line} {
-    #add -name
-
-    set line [string map {"create_static" "quasi_static"} $line]
-    set line [string map {"set_qualifier" "qualifier"} $line]
-    set line [string map {"set_sync_cell" "sync_cell"} $line]
-    set line [string map {"set_ip_block" "ip_block"} $line]
+    set line [string map {"create_static" "quasi_static -name"} $line]
+    set line [string map {"set_qualifier" "qualifier -name"} $line]
+    set line [string map {"set_sync_cell" "sync_cell -name"} $line]
+    set line [string map {"set_ip_block" "ip_block -name"} $line]
     return $line
 }
 
 proc parseGeneratedClockCmd {line} {
+    set line [string map {"create_generated_clock" "generated_clock"} $line]
+    set line [string map {"-master" "-master_clock"} $line]
+    set variable_name [get_object_name $line]
+    set line [regsub -all {\-name\s\w+} $line [list "-name" $variable_name ]]
+    set line [regsub -all {\[get_\w+\s.*\]$} $line ""]
+    return $line
 }
 
 proc parseSignalRelationshipCmd {line} {
