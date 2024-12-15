@@ -36,9 +36,21 @@ dict set command_dict set_signal_relationship parseSignalRelationshipCmd
 ######################################################################
 
 ################################# Proc of Dict ###############################
-#TOP.a.b.c to top.a/b/c
+#TOP/a/b/c to TOP.a.b.c
 proc convert_hierarchical_name {name} {
-    set hierarchical_name ""
+    set new_name ""
+    set name_list [split $name "/"]
+    foreach item $name_list {
+        if {$item == ""} {
+            continue
+        }
+        if {$new_name == ""} {
+            set new_name $item
+        } else {
+            set new_name "$new_name.$item"
+        }
+    }
+    return $new_name
 }
 
 #get_ports、get_nets、get_pins to get signal name
@@ -87,6 +99,7 @@ proc get_object_name {line} {
             puts "variable_name2: $variable_name"
         }
     }
+    set variable_name [convert_hierarchical_name $variable_name]
     return $variable_name
 }
 

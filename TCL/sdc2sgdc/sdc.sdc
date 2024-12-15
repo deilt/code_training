@@ -81,3 +81,7 @@ set_signal_relationship -exclusive X Y Z
 ####################### create_generated_clock #######################
 create_generated_clock -name gen_C1 -master C1 -divide_by 2 [get_ports out1]
 #generated_clock -name out1 -master_clock C1 -divide_by 2
+
+####################### set_clock_uncertainty ##########
+create_clock -name clka [get_ports TOP/clk3]
+#clock -name clk3 -domain clka

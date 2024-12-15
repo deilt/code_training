@@ -77,3 +77,7 @@ cdc_attribute -exclusive X Y Z
 ////////////////////////////////////////////// create_generated_clock //////////////////////////////////////////////
 generated_clock -name out1 -master_clock C1 -divide_by 2 
 //generated_clock -name out1 -master_clock C1 -divide_by 2
+
+////////////////////////////////////////////// set_clock_uncertainty ////////////////////
+clock -name TOP.clk3 -domain clka 
+//clock -name clk3 -domain clka
